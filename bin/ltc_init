@@ -1,0 +1,25 @@
+#!/bin/bash
+
+set -ex
+
+# This shouldn't be in the Dockerfile or containers built from the same image
+# will have the same credentials.
+if [ ! -e "$HOME/.litecoin/litecoin.conf" ]; then
+    mkdir -p $HOME/.litecoin
+
+    echo "Creating litecoin.conf"
+
+    # Seed a random password for JSON RPC server
+    cat <<EOF > $HOME/.litecoin/litecoin.conf
+regtest=${REGTEST:-0}
+disablewallet=${DISABLEWALLET:-1}
+printtoconsole=${PRINTTOCONSOLE:-1}
+rpcuser=${RPCUSER:-litecoinrpc}
+rpcpassword=${RPCPASSWORD:-`dd if=/dev/urandom bs=33 count=1 2>/dev/null | base64`}
+EOF
+
+fi
+
+cat $HOME/.litecoin/litecoin.conf
+
+echo "Initialization completed successfully"
