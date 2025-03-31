@@ -3,7 +3,7 @@ litecoind for Docker
 
 Docker image that runs the Litecoin `litecoind` node in a container for easy deployment.
 
-***Note: Credit for this image goes almost entirely to https://github.com/kylemanna/docker-litecoind, I have added some optimizations and migrated the overall setup to Litecoin and wanted a way to keep more easily up to date.***
+***Note: Credit for this image goes almost entirely to https://github.com/kylemanna/docker-bitcoind, I have added some optimizations and migrated the overall setup to Litecoin.***
 
 Quick Start
 -----------
