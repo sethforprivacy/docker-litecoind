@@ -13,7 +13,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 # Set variables necessary for download and verification of bitcoind
 ARG TARGETARCH
 ARG ARCH
-ARG VERSION=0.21.4
+ARG VERSION=0.21.5.4
 ARG LITECOIN_CORE_SIGNATURE=D35621D53A1CC6A3456758D03620E9D387E55666
 ENV LITECOIN_DATA=/litecoin/.litecoin
 ENV PATH=/opt/litecoin-${VERSION}/bin:$PATH
