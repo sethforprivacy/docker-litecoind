@@ -1,5 +1,5 @@
 # Use the latest available Ubuntu image as build stage
-FROM ubuntu:latest AS builder
+FROM ubuntu:26.04 AS builder
 
 # Upgrade all packages and install dependencies
 RUN apt-get update \
@@ -13,10 +13,11 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 # Set variables necessary for download and verification of bitcoind
 ARG TARGETARCH
 ARG ARCH
-ARG VERSION=0.21.5.5
+# renovate: datasource=github-releases depName=litecoin-project/litecoin versioning=loose
+ARG LITECOIN_VERSION=0.21.5.5
 ARG LITECOIN_CORE_SIGNATURE=D35621D53A1CC6A3456758D03620E9D387E55666
 ENV LITECOIN_DATA=/litecoin/.litecoin
-ENV PATH=/opt/litecoin-${VERSION}/bin:$PATH
+ENV PATH=/opt/litecoin-${LITECOIN_VERSION}/bin:$PATH
 
 RUN case ${TARGETARCH:-amd64} in \
     "arm64") ARCH="aarch64-linux-gnu";; \
@@ -24,17 +25,17 @@ RUN case ${TARGETARCH:-amd64} in \
     *) echo "Dockerfile does not support this platform"; exit 1 ;; \
     esac \
     && gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys ${LITECOIN_CORE_SIGNATURE} \
-    && wget -q --show-progress --progress=dot:giga https://download.litecoin.org/litecoin-${VERSION}/linux/litecoin-${VERSION}-${ARCH}.tar.gz \
-            https://download.litecoin.org/litecoin-${VERSION}/SHA256SUMS.asc \
+    && wget -q --show-progress --progress=dot:giga https://download.litecoin.org/litecoin-${LITECOIN_VERSION}/linux/litecoin-${LITECOIN_VERSION}-${ARCH}.tar.gz \
+            https://download.litecoin.org/litecoin-${LITECOIN_VERSION}/SHA256SUMS.asc \
     && gpg --verify SHA256SUMS.asc \
-    && grep " litecoin-${VERSION}-${ARCH}.tar.gz" SHA256SUMS.asc | sha256sum -c - \
+    && grep " litecoin-${LITECOIN_VERSION}-${ARCH}.tar.gz" SHA256SUMS.asc | sha256sum -c - \
     && tar -xzf *.tar.gz -C /opt \
-    && ln -sv litecoin-${VERSION} /opt/litecoin \
+    && ln -sv litecoin-${LITECOIN_VERSION} /opt/litecoin \
     && rm *.tar.gz *.asc \
-    && rm -rf /opt/litecoin-${VERSION}/bin/litecoin-qt
+    && rm -rf /opt/litecoin-${LITECOIN_VERSION}/bin/litecoin-qt
 
 # Use latest Ubuntu image as base for main image
-FROM ubuntu:latest AS final
+FROM ubuntu:26.04 AS final
 
 WORKDIR /litecoin
 
