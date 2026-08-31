@@ -1,5 +1,5 @@
-# Use the latest available Ubuntu image as build stage
-FROM ubuntu:26.04 AS builder
+# Use a pinned Ubuntu LTS image as build stage (kept current by Renovate)
+FROM ubuntu:26.04@sha256:2260313b31c8c011cd2eebe728008efac1b3982be73eb71348ea2648d2c0e09b AS builder
 
 # Upgrade all packages and install dependencies
 RUN apt-get update \
@@ -10,12 +10,14 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         gnupg \
     && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Set variables necessary for download and verification of bitcoind
+# Set variables necessary for download and verification of litecoin
 ARG TARGETARCH
 ARG ARCH
 # renovate: datasource=github-releases depName=litecoin-project/litecoin versioning=loose
 ARG LITECOIN_VERSION=0.21.5.6
-ARG LITECOIN_CORE_SIGNATURE=D35621D53A1CC6A3456758D03620E9D387E55666
+ARG LITECOIN_CORE_SIGNATURES="D35621D53A1CC6A3456758D03620E9D387E55666 \
+    C0921846FED0BF4CF28BE1D73B2A6315CD51A673 \
+    "
 ENV LITECOIN_DATA=/litecoin/.litecoin
 ENV PATH=/opt/litecoin-${LITECOIN_VERSION}/bin:$PATH
 
@@ -24,18 +26,19 @@ RUN case ${TARGETARCH:-amd64} in \
     "amd64") ARCH="x86_64-linux-gnu";; \
     *) echo "Dockerfile does not support this platform"; exit 1 ;; \
     esac \
-    && gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys ${LITECOIN_CORE_SIGNATURE} \
+    && gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys ${LITECOIN_CORE_SIGNATURES} \
     && wget -q --show-progress --progress=dot:giga https://download.litecoin.org/litecoin-${LITECOIN_VERSION}/linux/litecoin-${LITECOIN_VERSION}-${ARCH}.tar.gz \
             https://download.litecoin.org/litecoin-${LITECOIN_VERSION}/SHA256SUMS.asc \
-    && gpg --verify SHA256SUMS.asc \
+    && gpg --status-fd 1 --verify SHA256SUMS.asc 2>/dev/null \
+        | grep -Eq "^\[GNUPG:\] VALIDSIG.*($(printf '%s\n' ${LITECOIN_CORE_SIGNATURES} | paste -sd'|' -))$" \
     && grep " litecoin-${LITECOIN_VERSION}-${ARCH}.tar.gz" SHA256SUMS.asc | sha256sum -c - \
     && tar -xzf *.tar.gz -C /opt \
     && ln -sv litecoin-${LITECOIN_VERSION} /opt/litecoin \
     && rm *.tar.gz *.asc \
     && rm -rf /opt/litecoin-${LITECOIN_VERSION}/bin/litecoin-qt
 
-# Use latest Ubuntu image as base for main image
-FROM ubuntu:26.04 AS final
+# Use a pinned Ubuntu LTS image as base for main image (kept current by Renovate)
+FROM ubuntu:26.04@sha256:2260313b31c8c011cd2eebe728008efac1b3982be73eb71348ea2648d2c0e09b AS final
 
 WORKDIR /litecoin
 
@@ -62,6 +65,10 @@ VOLUME ["/litecoin/.litecoin"]
 
 # Set HOME
 ENV HOME=/litecoin
+
+# Add HEALTHCHECK probing the local RPC (credentials come from litecoin.conf,
+# which litecoin-cli reads from $HOME/.litecoin by default)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 CMD litecoin-cli -rpcconnect=127.0.0.1 -rpcport=9332 getblockchaininfo > /dev/null 2>&1 || exit 1
 
 EXPOSE 9332 9333
 
