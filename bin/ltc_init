@@ -20,6 +20,9 @@ EOF
 
 fi
 
-cat $HOME/.litecoin/litecoin.conf
+# Keep the RPC credentials out of stdout/logs; only report the config path
+chmod 600 "$HOME/.litecoin/litecoin.conf" 2>/dev/null || true
+
+echo "Initialized; litecoin.conf written to $HOME/.litecoin/litecoin.conf"
 
 echo "Initialization completed successfully"
