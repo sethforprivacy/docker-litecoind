@@ -14,7 +14,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 ARG TARGETARCH
 ARG ARCH
 # renovate: datasource=github-releases depName=litecoin-project/litecoin versioning=loose
-ARG LITECOIN_VERSION=0.21.5.6
+ARG LITECOIN_VERSION=0.21.5.8
 ARG LITECOIN_CORE_SIGNATURES="D35621D53A1CC6A3456758D03620E9D387E55666 \
     C0921846FED0BF4CF28BE1D73B2A6315CD51A673 \
     "
