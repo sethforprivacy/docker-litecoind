@@ -9,6 +9,7 @@ on:
   pull_request:
     paths:
     - 'Dockerfile'
+    - '.github/**'
   workflow_dispatch:
 
 env:
