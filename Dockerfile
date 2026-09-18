@@ -1,5 +1,5 @@
 # Use a pinned Ubuntu LTS image as build stage (kept current by Renovate)
-FROM ubuntu:26.04@sha256:9559ceb7c21e528e233e8dff26a0fb2682f4094cce06176eeb075d87a22b31de AS builder
+FROM ubuntu:26.04@sha256:da6fc2be547864451aa253836dd926da33623312df4a9a243e35dc877c378a78 AS builder
 
 # Upgrade all packages and install dependencies
 RUN apt-get update \
@@ -38,7 +38,7 @@ RUN case ${TARGETARCH:-amd64} in \
     && rm -rf /opt/litecoin-${LITECOIN_VERSION}/bin/litecoin-qt
 
 # Use a pinned Ubuntu LTS image as base for main image (kept current by Renovate)
-FROM ubuntu:26.04@sha256:9559ceb7c21e528e233e8dff26a0fb2682f4094cce06176eeb075d87a22b31de AS final
+FROM ubuntu:26.04@sha256:da6fc2be547864451aa253836dd926da33623312df4a9a243e35dc877c378a78 AS final
 
 WORKDIR /litecoin
 
