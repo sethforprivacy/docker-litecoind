@@ -55,7 +55,7 @@ COPY --chown=litecoin:litecoin --from=builder /opt/litecoin/bin/ /usr/local/bin/
 # Upgrade all packages and install dependencies
 RUN apt-get update \
     && apt-get upgrade -y
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends gosu \
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends gosu ca-certificates \
     && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Copy scripts to Docker image
